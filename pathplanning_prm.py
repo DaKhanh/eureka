@@ -88,11 +88,7 @@ def generate_environment_instances(env_configs):
     return environments
 
 environment_configs = [
-    ((10, 6), 5),   # Small environment with a few obstacles
-    ((15, 10), 10), # Larger environment with more obstacles
-    ((20, 15), 20), # Even larger environment
-    ((10, 6), 15),  # Small environment with many obstacles
-    ((15, 10), 0)   # Large empty environment
+    ((20, 15), 10)
 ]
 
 def generate_random_queries(env, n_queries):
@@ -149,62 +145,8 @@ def test_prm_with_environments_and_queries(env_configs, n_samples=100, k=5, n_qu
         print(f"Environment {env_idx + 1} processed in {elapsed_time:.2f} seconds.\n")
 
 
-# Test the PRM with single query
-def test_prm_single_environment_single_query(env_config, n_samples=100, k=5, save_dir="plots"):
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
-    environments = generate_environment_instances([env_config])
-    env = environments[0]
-
-    start_time = time.time()  
-    print(f"Testing PRM on environment with size {env.size_x} x {env.size_y} and {len(env.obs)} obstacles.")
-    
-    env.plot()
-
-    prm = PRM(env, n_samples=n_samples, k=k)
-    prm.sample_free()
-    prm.connect_samples()
-
-    queries = generate_random_queries(env, n_queries=1)
-    if queries:
-        x_start, y_start, x_goal, y_goal = queries[0]
-        print(f"Query: start=({x_start:.2f}, {y_start:.2f}), goal=({x_goal:.2f}, {y_goal:.2f})")
-
-        env.plot_query(x_start, y_start, x_goal, y_goal)
-
-        start = (x_start, y_start)
-        goal = (x_goal, y_goal)
-
-        path = prm.find_path(start, goal)
-
-        if path:
-            path = np.array(path)
-            pl.plot(path[:, 0], path[:, 1], 'g--', linewidth=2)
-        else:
-            print(f"No path found for query: start={start}, goal={goal}")
-
-        pl.title(f"Environment size: {env.size_x} x {env.size_y}, Obstacles: {len(env.obs)}")
-
-        plot_filename = f"env_{env.size_x}x{env.size_y}_obstacles_{len(env.obs)}.png"
-        plot_path = os.path.join(save_dir, plot_filename)
-        pl.savefig(plot_path)
-        print(f"Plot saved to {plot_path}")
-
-        pl.clf()
-
-    else:
-        print("No valid queries were generated.")
-
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Environment processed in {elapsed_time:.2f} seconds.\n")
-
-
-np.random.seed(4)  
+np.random.seed(24)  
 test_prm_with_environments_and_queries(environment_configs, n_samples=100, k=5, n_queries=5)
-single_env_config = ((15, 10), 8)  
-test_prm_single_environment_single_query(single_env_config, n_samples=100, k=5, save_dir="plots")
 
 
 
